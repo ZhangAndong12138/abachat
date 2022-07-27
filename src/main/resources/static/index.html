@@ -1,0 +1,87 @@
+<html>
+<head>
+    <title>abaaba</title>
+    <meta charset="utf-8"/>
+</head>
+<body>
+<div class="content">
+    <div class="top">
+        <p>连接WebSocket</p>
+        <div class="btn">
+            <input id="ip" type="text" value="127.0.0.1">
+            <button id="connect" onclick="connect();">连接</button>
+            <button id="close" onclick="disconnect();" style="display: none">断开</button>
+        </div>
+    </div>
+    <div id="upload" class="upload" style="display: none">
+        <p>传输文件</p>
+        <form enctype="multipart/form-data" method="post" id="uploadForm" target="_blank">
+            <input type="file" name="file" id="file"/>
+            <input type="submit" name="提交"/>
+        </form>
+    </div>
+    <div class="chat" id="chat" style="display: none">
+        <div class="record">
+            <ul id="record">
+                <li>====== abaaba聊天 ======</li>
+            </ul>
+        </div>
+        <div class="send">
+            <input id="msg" type="text"/>
+            <button id="send" onclick="send();">发送</button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var socket;
+
+    function connect() {
+        let ip = document.getElementById("ip").value;
+        socket = new WebSocket("ws://" + ip + ":10086/abaaba");
+
+        document.getElementById("uploadForm").setAttribute("action", "http://" + ip + ":10086/upload");
+
+        socket.onopen = function () {
+            document.getElementById("chat").style.display = "";
+            document.getElementById("upload").style.display = "";
+            document.getElementById("close").style.display = "";
+            document.getElementById("connect").style.display = "none";
+        }
+
+        socket.onmessage = function (msg) {
+            let name = msg.origin.replace("ws://", "").replace(":10086", "");
+            addMsg("[" + name + "]: " + msg.data);
+        }
+
+        socket.onclose = function () {
+            document.getElementById("chat").style.display = "none";
+            document.getElementById("upload").style.display = "none";
+            document.getElementById("close").style.display = "none";
+            document.getElementById("connect").style.display = "";
+        }
+
+        socket.onerror = function () {
+            alert("连接发生错误");
+        }
+    }
+
+    function send() {
+        let msg = document.getElementById("msg").value;
+        socket.send(msg);
+        addMsg("[你]：" + msg);
+        document.getElementById("msg").value = "";
+    }
+
+    function addMsg(msg) {
+        let li = document.createElement("li");
+        li.innerText = msg;
+        document.getElementById("record").appendChild(li);
+    }
+
+    function disconnect() {
+        socket.close();
+    }
+
+</script>
+</html>

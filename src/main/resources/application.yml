@@ -1,0 +1,8 @@
+server:
+  port: 10086
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 1000MB
+      max-request-size: 1000MB
